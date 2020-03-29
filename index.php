@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', 1);
 
 require_once 'config.php';
 
@@ -51,7 +52,7 @@ $result = curl_exec($ch);
 
 preg_match('/<i class="lk_svg lk_svg_user_balans"><\/i>\s*<p>([^"]*)<\/p>/is', $result, $balance);
 
-$balance = $balance[0];
+$balance = strip_tags($balance[0]);
 
 $message .= "$user: $balance<br>";
 sleep(1);
