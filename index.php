@@ -1,11 +1,14 @@
 <?php
 
-require_once 'phpQuery-onefile.php';
 require_once 'config.php';
 
+$message = '';
+
+foreach ($accounts as $user => $data) {
+
 $post = [
-  'j_username' => $login,
-  'j_password' => $pass
+  'j_username' => $data['login'],
+  'j_password' => $data['pass']
 ];
 
 $url = 'https://lk.megafon.ru/login/';
@@ -46,12 +49,14 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
 
 $result = curl_exec($ch);
 
-preg_match('/<i class="lk_svg lk_svg_user_balans"><\/i>\s*<p>([^"]*)/is', $result, $balance);
+preg_match('/<i class="lk_svg lk_svg_user_balans"><\/i>\s*<p>([^"]*)<\/p>/is', $result, $balance);
 
 $balance = $balance[0];
 
+$message .= "$user: $balance<br>";
+sleep(1);
+}
+
+echo $message;
 $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
-
-mail("gorkundp@yandex.ru", "Мегафон баланс", "На счету у Тамары Ивановны: $balance", $headers);
-
-echo $balance;
+mail($mailto, "Мегафон баланс", $message, $headers);
