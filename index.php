@@ -1,11 +1,22 @@
 <?php
-ini_set('display_errors', 1);
+$url = ((!empty($_SERVER['HTTPS'])) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+file_put_contents('request.log', $url);
+ini_set('display_errors', 0);
 
 require_once 'config.php';
 
 $message = '';
 
-foreach ($accounts as $user => $data) {
+$user = @$_GET['user'];
+if(isset($accounts[$user]))
+{
+  $data = $accounts[$user];
+} else {
+  die(json_encode([
+    'status' => 'error',
+    'message' => 'Абонент не найден'
+    ]));
+}
 
 $post = [
   'j_username' => $data['login'],
@@ -55,12 +66,14 @@ preg_match('/<i class="lk_svg lk_svg_user_balans"><\/i>\s*<p>([^"]*)<\/p>/is', $
 $balance = strip_tags($balance[0]);
 
 $message .= "$user: $balance<br>";
-sleep(1);
-}
 
-if($_GET['mail'] == 'yes') {
+
+if(isset($_GET['mail'])) {
   $headers = 'Content-type: text/html; charset=utf-8' . "\r\n";
   mail($mailto, "Мегафон баланс", $message, $headers);
 }
-
-echo $message;
+$balance = $balance ?: 'фиг знает сколько денег :(';
+die (json_encode([
+  'status' => 'success',
+  'message' => $balance
+]));
